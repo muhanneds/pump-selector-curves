@@ -474,6 +474,47 @@ button.unit.unit-toggle:active{ background: var(--amber); border-color: var(--am
   main[data-tab="selector"] .card{ margin-bottom:0; padding:24px 24px 22px; border-radius:20px; }
   main[data-tab="selector"] #resultArea{ position: sticky; top: 24px; }
 
+  /* ---------- Horizontal / Vertical: same two-column idea as Selector ----------
+     The duty form is short and never changes while you compare; the answer is a
+     curve plus a list that does. So the form is pinned on the left at a width
+     that fits its own controls, and the whole right column belongs to the
+     result -- rather than a 560px phone column stranded in the middle of a
+     desktop screen. */
+  main[data-tab="horizontal"],
+  main[data-tab="vertical"]{
+    display:grid;
+    grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+  /* Direct child only: the curve cards live inside #sResults and must not be
+     pulled into the left column. */
+  main[data-tab="horizontal"] > .card,
+  main[data-tab="vertical"] > .card{
+    margin-bottom:0; padding:24px 24px 22px; border-radius:20px;
+    position: sticky; top: 24px;
+  }
+  main[data-tab="horizontal"] #sResults,
+  main[data-tab="vertical"] #sResults{ min-width:0; }
+
+  /* The list is for comparing, so the rows stay compact and the chart gets the
+     room -- a result row blown up to plate size would out-shout the curve. */
+  .curve-card{ padding:20px 20px 16px; border-radius:20px; }
+  .curve-head{ margin:0 2px 10px; }
+  .curve-subject{ font-size:13px; }
+  .results-head{ margin-bottom:14px; }
+  .results-head h2{ font-size:19px; }
+  .plate.result-row{ padding:18px 22px 16px; border-radius:16px; }
+  .plate.result-row .model{ font-size:24px; }
+  .plate.result-row.best .model{ font-size:27px; }
+  .plate.result-row .plate-grid{ margin-top:14px; padding-top:12px; }
+  .plate.result-row .plate-grid .stat-value{ font-size:16px; }
+  /* The instrument-panel dividers are set on .plate-grid above; inside a
+     compact row they need their own tighter gutter. */
+  .plate.result-row .plate-grid > div{ padding-inline:14px; }
+  .plate.result-row .plate-grid > div:first-child{ padding-inline-start:0; }
+  .plate.result-row .plate-grid > div:last-child{ padding-inline-end:0; }
+
   .card h2{ font-size:13px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line); }
   .field{ margin-bottom:16px; }
   .field > label{ font-size:11.5px; }

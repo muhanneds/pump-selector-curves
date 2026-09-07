@@ -750,20 +750,30 @@ if ('serviceWorker' in navigator){
 // ---------------------------------------------------------------------------
 const STORE_KEY_SURFACE = 'msp_surface_state_v1';
 
-const HZ_SPEEDS  = [['any','—'], ['1450','1450'], ['2900','2900']];
-const VT_FREQS   = [['any','—'], ['50 Hz','50Hz'], ['60 Hz','60Hz'], ['Engine','Engine']];
-const VT_DRIVES  = [['any','—'], ['Electric','Electric'], ['Diesel','Diesel']];
+// No "any" rung on these. It rendered as a bare dash -- a selected segment
+// with nothing written in it, which reads as a broken control rather than a
+// choice. Each of these is something you already know before you specify a
+// pump (the grid frequency, the drive, the speed you want), so the filter
+// starts on a real value instead.
+const HZ_SPEEDS  = [['1450','1450'], ['2900','2900']];
+const VT_FREQS   = [['50 Hz','50Hz'], ['60 Hz','60Hz'], ['Engine','Engine']];
+const VT_DRIVES  = [['Electric','Electric'], ['Diesel','Diesel']];
 
 let surfState = loadSurfaceState();
 function loadSurfaceState(){
   try{
     const raw = localStorage.getItem(STORE_KEY_SURFACE);
-    if (raw) return Object.assign(defaultSurfaceState(), JSON.parse(raw));
+    if (raw){
+      const st = Object.assign(defaultSurfaceState(), JSON.parse(raw));
+      const d = defaultSurfaceState();
+      ['speed','freq','drive'].forEach(function(k){ if (st[k] === 'any') st[k] = d[k]; });
+      return st;
+    }
   }catch(e){}
   return defaultSurfaceState();
 }
 function defaultSurfaceState(){
-  return { Q:'', H:'', safety:5, speed:'any', freq:'any', drive:'any', pick:0 };
+  return { Q:'', H:'', safety:5, speed:'1450', freq:'50 Hz', drive:'Electric', pick:0 };
 }
 function saveSurfaceState(){
   try{ localStorage.setItem(STORE_KEY_SURFACE, JSON.stringify(surfState)); }catch(e){}
