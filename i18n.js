@@ -19,6 +19,7 @@ const LANGS = {
 
 const STRINGS = {
   en: {
+    mspCode:'MSP code',
     curveTitle:'Performance curve', powerTitle:'Power curve',
     keySelected:'Selected', keyOthers:'Other models', keyDuty:'Your duty point', keyDesign:'Design head',
     // --- Surface ranges: Horizontal (MMP) and Vertical (MTP) ---
@@ -62,6 +63,7 @@ const STRINGS = {
     followUs:'Follow us', contactUs:'Contact us'
   },
   tr: {
+    mspCode:'MSP kodu',
     curveTitle:'Performans eğrisi', powerTitle:'Güç eğrisi',
     keySelected:'Seçilen', keyOthers:'Diğer modeller', keyDuty:'Çalışma noktanız', keyDesign:'Tasarım basma yüksekliği',
     // --- Yüzey gamları: Yatay (MMP) ve Dik milli (MTP) ---
@@ -105,6 +107,7 @@ const STRINGS = {
     followUs:'Bizi takip edin', contactUs:'Bize ulaşın'
   },
   ar: {
+    mspCode:'كود MSP',
     curveTitle:'منحنى الأداء', powerTitle:'منحنى القدرة',
     keySelected:'المختار', keyOthers:'موديلات أخرى', keyDuty:'نقطة التشغيل', keyDesign:'الرفع التصميمي',
     // --- المضخات السطحية: أفقية (MMP) وعمودية (MTP) ---
@@ -148,6 +151,7 @@ const STRINGS = {
     followUs:'تابعنا', contactUs:'تواصل معنا'
   },
   es: {
+    mspCode:'Código MSP',
     curveTitle:'Curva de rendimiento', powerTitle:'Curva de potencia',
     keySelected:'Seleccionada', keyOthers:'Otros modelos', keyDuty:'Su punto de trabajo', keyDesign:'Altura de diseño',
     // --- Gamas de superficie: Horizontal (MMP) y Vertical (MTP) ---

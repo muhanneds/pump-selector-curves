@@ -166,6 +166,28 @@ function selectHorizontal(opts){
 // efficiency at the duty point -- the best answer available, and the reason
 // the efficiency work starts on this range.
 // ---------------------------------------------------------------------------
+// MSP's own shorthand for a vertical pump: the first two digits of the series
+// number followed by the middle flow of its published row, written closed up --
+// MTP 242/1F1-A/400-50/D16-1300 publishes 1200/1320/1440/1560/1680/1800/1920,
+// so it is written MTP 241560.
+//
+// This names a HYDRAULIC SIZE, not one pump: it carries no stage count, so a
+// median of 16 models (up to 65) share a code, and three codes are claimed by
+// more than one series because the third series digit is dropped --
+// MTP 181440 covers MTP 186, 187 and 188. It is therefore shown ALONGSIDE the
+// full code and never used to identify or select a pump.
+//
+// The middle flow is close to the best efficiency point but is not it: across
+// 1435 models it is exactly the peak 49% of the time and within one flow step
+// 90% of the time, so the UI presents it as a code, not as an efficiency claim.
+function mtpShortCode(series, q){
+  const num = String(series || '').split(' ')[1];
+  if (!num || !q || !q.length) return null;
+  const mid = q[Math.floor(q.length / 2)];
+  if (mid == null || !isFinite(mid)) return null;
+  return 'MTP ' + num.slice(0, 2) + Math.round(mid);
+}
+
 function selectVertical(opts){
   const Q = Number(opts.Q) || 0;
   const designHead = designHeadOf(opts.H, opts.safety);
@@ -191,6 +213,7 @@ function selectVertical(opts){
     out.push({
       range: 'vertical',
       code: m.code, series: m.series, ref: m.ref,
+      short: mtpShortCode(m.series, m.q),   // MSP shorthand, label only
       drive: m.drive, freq: m.freq, rpm: m.rpm, stages: m.stages,
       weightKg: m.weightKg, motorKw: m.motorKw, motorHp: m.motorHp,
       Q, designHead, achievedHead: h,
@@ -223,6 +246,6 @@ function selectVertical(opts){
 }
 
 if (typeof module !== 'undefined'){
-  module.exports = { selectHorizontal, selectVertical, interpAt, hydraulicKw,
+  module.exports = { selectHorizontal, selectVertical, interpAt, hydraulicKw, mtpShortCode,
                      motorEff, designHeadOf, ASSUMED_PUMP_EFF };
 }

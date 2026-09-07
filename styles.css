@@ -897,3 +897,28 @@ svg.curve .cdot{ fill: var(--amber); stroke: var(--amber-deep); stroke-width:2; 
 .plate.result-row.picked{
   box-shadow: 0 0 0 2.5px var(--amber), var(--shadow-2);
 }
+
+/* MSP's own shorthand for a vertical pump (MTP 241560) sits beside the full
+   catalogue code, not instead of it: the shorthand carries no stage count, so
+   a median of 16 models share one, and it is a label rather than an identity.
+   Given its own accent so it is not mistaken for the speed chip next to it. */
+.tag-group{ display:flex; align-items:center; gap:6px; flex:none; flex-wrap:wrap; justify-content:flex-end; }
+.plate .series-tag.code-tag{
+  background: rgba(245,200,66,.18);
+  border-color: rgba(245,200,66,.55);
+  color: #FFE9A8;
+}
+
+/* Vertical flows reach 2580 m³/h and horizontal 100+, where the borehole range
+   rarely passes two digits. On a 375px phone the three-across duty row leaves
+   the Flow Q field about 27px of room for its digits, so a four-figure flow was
+   being clipped in every language. On the two surface tabs the row therefore
+   drops to two across with Safety on its own line -- the same shape as the
+   narrow-Android rule above, but keyed to the data rather than the platform,
+   because a four-digit flow does not fit on any phone. */
+@media (max-width: 560px){
+  main[data-tab="horizontal"] .row3.duty-row,
+  main[data-tab="vertical"] .row3.duty-row{ grid-template-columns: 1fr 1fr; }
+  main[data-tab="horizontal"] .row3.duty-row > :nth-child(3),
+  main[data-tab="vertical"] .row3.duty-row > :nth-child(3){ grid-column: 1 / -1; }
+}
