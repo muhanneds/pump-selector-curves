@@ -476,36 +476,18 @@ button.unit.unit-toggle:active{ background: var(--amber); border-color: var(--am
     gap: 24px 28px;
     align-items: start;
   }
-  /* Left column is the form then the social bar; the result column spans both
-     of those rows so the plate can grow to their full combined height, and
-     the curve takes a full-width row underneath. On a phone none of this
-     applies and the areas simply stack: form, answer, curve, bar. */
+  /* Three rows: the form spans the first two on the left, so the space left
+     over beside it -- the duty form is taller than the plate and its
+     alternative -- is a real cell the social/contact bar can sit in, pinned to
+     the bottom so it lines up with the end of the form. On a phone none of
+     this applies and the bar stays where it belongs, last on the page. */
   main[data-tab="selector"] > .card{
-    grid-column:1; grid-row:1;
+    grid-column:1; grid-row:1 / 3;
     margin-bottom:0; padding:24px 24px 22px; border-radius:20px;
   }
-  /* The plate used to stop at its own content height, leaving a band of empty
-     page between the alternative box and whatever sat below it. It takes the
-     slack instead now, so the selected pump fills the column beside the form.
-     Its spec row is pinned to the bottom as the plate grows, so the extra
-     height reads as a deliberate instrument panel, not a card with a hole. */
-  main[data-tab="selector"] #resultArea{
-    grid-column:2; grid-row:1 / 3; min-width:0;
-    align-self: stretch;
-    display:flex; flex-direction:column;
-  }
-  main[data-tab="selector"] #resultArea .plate{ flex:1 1 auto; display:flex; flex-direction:column; }
-  main[data-tab="selector"] #resultArea .plate .plate-grid{ margin-top:auto; }
-  main[data-tab="selector"] #resultArea .altbox{ flex:0 0 auto; margin-bottom:0; }
-  /* Now that the plate is tall on purpose, its type can sit at the size the
-     box implies. Still well below the 44px it used before, when the plate was
-     only as tall as its own content and read as oversized. */
-  main[data-tab="selector"] #resultArea .plate .model{ font-size:38px; }
-  main[data-tab="selector"] #resultArea .plate .status{ margin-top:14px; font-size:14px; }
-  main[data-tab="selector"] #resultArea .plate .plate-grid{ padding-top:18px; }
-  main[data-tab="selector"] #resultArea .plate-grid .stat-value{ font-size:19px; }
+  main[data-tab="selector"] #resultArea{ grid-column:2; grid-row:1; min-width:0; }
   main[data-tab="selector"] #footerArea{
-    grid-column:1; grid-row:2; min-width:0; align-self:start;
+    grid-column:2; grid-row:2; min-width:0; align-self:end;
   }
   main[data-tab="selector"] #footerArea .social-footer{ margin-top:0; }
   main[data-tab="selector"] #curveArea{ grid-column:1 / -1; grid-row:3; min-width:0; }
