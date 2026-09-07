@@ -416,7 +416,7 @@ function renderCurveAreaHTML(ready, r){
                               Number(selState.Q)||0, r.primary.achievedHead, r.designHead);
     if (svg) curveHTML = curveCardHTML(t('curveTitle'), svg, r.primary.model.name);
   }
-  return curveHTML + renderSocialFooterHTML();
+  return curveHTML;
 }
 
 function renderHintHTML(ready, r){
@@ -471,6 +471,7 @@ function renderSelectorHTML(){
 
     <div id="resultArea">${renderResultsHTML(ready, r)}</div>
     <div id="curveArea">${renderCurveAreaHTML(ready, r)}</div>
+    <div id="footerArea">${renderSocialFooterHTML()}</div>
   `;
 }
 
