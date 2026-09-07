@@ -19,6 +19,19 @@ const LANGS = {
 
 const STRINGS = {
   en: {
+    // --- Surface ranges: Horizontal (MMP) and Vertical (MTP) ---
+    tabHorizontal:'Horizontal', tabVertical:'Vertical',
+    horizontalTitle:'Horizontal multistage — MMP', verticalTitle:'Vertical line-shaft — MTP',
+    speedRpm:'Speed (rpm)', driveType:'Drive', driveElectric:'Electric', driveDiesel:'Diesel',
+    matches:'Matches', matchCount:'{n} shown of {all}',
+    meetsDuty:'{head} m at Q={q} · {over} above duty',
+    stagesLbl:'Stages', impeller:'Impeller', casing:'Casing', dnLbl:'Discharge',
+    motorSuggested:'Motor', shaftPowerEst:'Shaft power (est.)',
+    motorLadderNote:'Catalogue motor options: {list} kW. Shaft power estimated at {eff} pump efficiency — confirm before quoting.',
+    absorbedPower:'Absorbed power', effPump:'Pump eff.', effMotor:'Motor eff.', effSystem:'System eff.',
+    effNote:'Pump efficiency is calculated from the absorbed power published in the catalogue. Motor efficiency is an IE3 reference value, not an MSP motor test.',
+    powerSuspect:'Efficiency withheld — the published absorbed power for this duty point fails a plausibility check.',
+    noSurfaceMatch:'No pump in this range reaches {head} m at Q={q}',
     appTitle:'MSP Pump', tabSelector:'Selector', tabTender:'Tender',
     language:'Language',
     dutyPoint:'Duty point',
@@ -47,6 +60,19 @@ const STRINGS = {
     followUs:'Follow us', contactUs:'Contact us'
   },
   tr: {
+    // --- Yüzey gamları: Yatay (MMP) ve Dik milli (MTP) ---
+    tabHorizontal:'Yatay', tabVertical:'Dik Milli',
+    horizontalTitle:'Yatay kademeli — MMP', verticalTitle:'Dik milli — MTP',
+    speedRpm:'Devir (d/dak)', driveType:'Tahrik', driveElectric:'Elektrik', driveDiesel:'Dizel',
+    matches:'Eşleşmeler', matchCount:'{all} içinden {n} gösteriliyor',
+    meetsDuty:'Q={q} değerinde {head} m · görevin {over} üzerinde',
+    stagesLbl:'Kademe', impeller:'Fan çapı', casing:'Gövde', dnLbl:'Çıkış',
+    motorSuggested:'Motor', shaftPowerEst:'Mil gücü (tahmini)',
+    motorLadderNote:'Katalog motor seçenekleri: {list} kW. Mil gücü {eff} pompa verimi varsayımıyla tahmin edilmiştir — teklif öncesi doğrulayın.',
+    absorbedPower:'Çekilen güç', effPump:'Pompa verimi', effMotor:'Motor verimi', effSystem:'Sistem verimi',
+    effNote:'Pompa verimi katalogda yayımlanan çekilen güçten hesaplanmıştır. Motor verimi IE3 referans değeridir, MSP motor testi değildir.',
+    powerSuspect:'Verim gösterilmiyor — bu çalışma noktası için yayımlanan çekilen güç makullük kontrolünden geçmedi.',
+    noSurfaceMatch:'Bu gamda Q={q} değerinde {head} m sağlayan pompa yok',
     appTitle:'MSP Pompa', tabSelector:'Seçici', tabTender:'Teklif',
     language:'Dil',
     dutyPoint:'Çalışma noktası',
@@ -75,6 +101,19 @@ const STRINGS = {
     followUs:'Bizi takip edin', contactUs:'Bize ulaşın'
   },
   ar: {
+    // --- المضخات السطحية: أفقية (MMP) وعمودية (MTP) ---
+    tabHorizontal:'أفقية', tabVertical:'عمودية',
+    horizontalTitle:'مضخات أفقية متعددة المراحل — MMP', verticalTitle:'مضخات عمودية بعمود إدارة — MTP',
+    speedRpm:'السرعة (دورة/دقيقة)', driveType:'نوع التشغيل', driveElectric:'كهربائي', driveDiesel:'ديزل',
+    matches:'النتائج', matchCount:'عرض {n} من {all}',
+    meetsDuty:'{head} m عند Q={q} · أعلى من المطلوب بنسبة {over}',
+    stagesLbl:'المراحل', impeller:'قطر الدافعة', casing:'ضغط الجسم', dnLbl:'فتحة الطرد',
+    motorSuggested:'المحرك', shaftPowerEst:'قدرة العمود (تقديرية)',
+    motorLadderNote:'خيارات المحرك في الكتالوج: {list} kW. قدرة العمود مقدّرة بافتراض كفاءة مضخة {eff} — يرجى التأكد قبل التسعير.',
+    absorbedPower:'القدرة الممتصة', effPump:'كفاءة المضخة', effMotor:'كفاءة المحرك', effSystem:'كفاءة النظام',
+    effNote:'كفاءة المضخة محسوبة من القدرة الممتصة المنشورة في الكتالوج. كفاءة المحرك قيمة مرجعية IE3 وليست اختبار محرك MSP.',
+    powerSuspect:'الكفاءة غير معروضة — القدرة الممتصة المنشورة لهذه النقطة لا تجتاز فحص المعقولية.',
+    noSurfaceMatch:'لا توجد مضخة في هذا النطاق تصل إلى {head} m عند Q={q}',
     appTitle:'مضخات MSP', tabSelector:'المحدد', tabTender:'العطاء',
     language:'اللغة',
     dutyPoint:'نقطة التشغيل',
@@ -103,6 +142,19 @@ const STRINGS = {
     followUs:'تابعنا', contactUs:'تواصل معنا'
   },
   es: {
+    // --- Gamas de superficie: Horizontal (MMP) y Vertical (MTP) ---
+    tabHorizontal:'Horizontal', tabVertical:'Vertical',
+    horizontalTitle:'Multietapa horizontal — MMP', verticalTitle:'Eje vertical — MTP',
+    speedRpm:'Velocidad (rpm)', driveType:'Accionamiento', driveElectric:'Eléctrico', driveDiesel:'Diésel',
+    matches:'Coincidencias', matchCount:'{n} de {all} mostradas',
+    meetsDuty:'{head} m con Q={q} · {over} por encima del punto',
+    stagesLbl:'Etapas', impeller:'Impulsor', casing:'Carcasa', dnLbl:'Descarga',
+    motorSuggested:'Motor', shaftPowerEst:'Potencia al eje (est.)',
+    motorLadderNote:'Opciones de motor del catálogo: {list} kW. Potencia al eje estimada con un rendimiento de bomba de {eff} — confirmar antes de cotizar.',
+    absorbedPower:'Potencia absorbida', effPump:'Rend. bomba', effMotor:'Rend. motor', effSystem:'Rend. sistema',
+    effNote:'El rendimiento de la bomba se calcula con la potencia absorbida publicada en el catálogo. El del motor es un valor de referencia IE3, no un ensayo de motor MSP.',
+    powerSuspect:'Rendimiento no mostrado — la potencia absorbida publicada para este punto no supera la comprobación de coherencia.',
+    noSurfaceMatch:'Ninguna bomba de esta gama alcanza {head} m con Q={q}',
     appTitle:'Bombas MSP', tabSelector:'Selector', tabTender:'Licitación',
     language:'Idioma',
     dutyPoint:'Punto de trabajo',

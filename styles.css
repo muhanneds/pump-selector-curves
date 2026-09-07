@@ -652,3 +652,83 @@ bdi{ unicode-bidi: isolate; }
 [dir="rtl"] .field > label,
 [dir="rtl"] .plate .plate-label{ font-size:12.5px; }
 [dir="rtl"] .tabbar button{ font-size:12px; }
+
+/* ---------- Surface ranges: Horizontal / Vertical result list ----------
+   The Selector answers with one plate; these two answer with a ranked list,
+   because a surface duty point is usually met by several genuinely different
+   pumps. Rows reuse .plate so the visual language stays the same, dialled
+   down a step so a list of them doesn't read as ten separate headline
+   answers -- only the top-ranked row keeps full contrast. */
+.results-head{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; margin:2px 0 12px;
+}
+.results-head h2{ font-size:17px; font-weight:800; margin:0; color:var(--navy); }
+
+.plate.result-row{
+  padding:14px 16px 13px;
+  background: linear-gradient(155deg, #3D5075 0%, #2E3D57 100%);
+}
+.plate.result-row .model{ font-size:19px; }
+.plate.result-row .status{ margin-top:8px; font-size:12.5px; }
+.plate.result-row .plate-grid{ margin-top:12px; padding-top:11px; }
+.plate.result-row .plate-grid + .plate-grid{
+  margin-top:10px; padding-top:10px;
+}
+.plate.result-row .plate-grid .stat-value{ font-size:14px; }
+
+/* The recommended pick — full navy, so it reads as the answer and the rest
+   read as alternatives worth a look. */
+.plate.result-row.best{
+  background: linear-gradient(155deg, var(--navy) 0%, var(--navy-deep) 100%);
+  box-shadow: var(--shadow-2);
+}
+.plate.result-row.best .model{ font-size:22px; }
+
+/* Provenance/assumption footnotes. Deliberately quiet: they qualify the
+   numbers above without competing with them. */
+.status-note.small{
+  font-size:11px; line-height:1.45; margin-top:10px;
+  padding-top:9px; border-top:1px solid rgba(255,255,255,.12);
+}
+.plate .status-note.small{ color:#A8BAD6; }
+.plate .status-note.warn-note{ color:#FFC978; }
+
+/* Four tabs instead of two: keep the labels on one line on narrow phones
+   rather than letting "Horizontal" wrap under its icon. */
+@media (max-width: 420px){
+  .tabbar button{ font-size:10.5px; letter-spacing:0; }
+  .tabbar button svg{ width:20px; height:20px; }
+}
+
+/* Three stats across gets tight in Arabic, where the labels are whole words
+   rather than abbreviations. (Caps/tracking are already handled for
+   .plate-grid .stat-label by the no-caps RTL block above.) */
+[dir="rtl"] .plate.result-row .plate-grid{ gap:8px; }
+
+/* A duty row's three labels are not the same length, and the longest ("Safety
+   margin", and its longer translations) wraps to two lines on a narrow phone.
+   Because the columns are grid items they already stretch to equal height, so
+   letting the label take the slack and pinning the input to the bottom keeps
+   all three inputs on one line no matter how the labels wrap. */
+.row3.duty-row > div{ display:flex; flex-direction:column; }
+.row3.duty-row > div > label{ flex:1; }
+.row3.duty-row > div > .numfield{ margin-top:auto; }
+
+/* Three stats across a phone-width card leaves ~100px per column; the result
+   rows carry longer labels than the Selector plate does, so they get a size
+   down rather than wrapping mid-value. */
+@media (max-width: 430px){
+  .plate.result-row .plate-grid{ gap:8px; }
+  .plate.result-row .plate-grid .stat-label{ font-size:9.5px; letter-spacing:.3px; }
+  .plate.result-row .plate-grid .stat-value{ font-size:13px; }
+}
+
+/* Flow Q and Head H carry a unit-TOGGLE (a bordered pill), Safety margin
+   carries a plain "%" span. The pill's border and padding make its numfield
+   ~1.6px taller, so the three boxes in a duty row ended up slightly different
+   heights even when their bottoms lined up. Give the plain unit the same box
+   metrics with an invisible border so all three boxes match exactly. */
+.row3.duty-row .numfield > span.unit{
+  padding: 3px 0; border: 1px solid transparent; line-height: inherit;
+}

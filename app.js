@@ -238,12 +238,24 @@ function newLine(){
 // ---------------------------------------------------------------------------
 // Tab switching
 // ---------------------------------------------------------------------------
+// Four ranges/screens now, in the order an order actually gets built: pick a
+// borehole pump, or a surface pump (horizontal or vertical), then price it.
+const TABS = ['selector', 'horizontal', 'vertical', 'tender'];
+const TAB_IDS = { selector:'tabSelector', horizontal:'tabHorizontal',
+                  vertical:'tabVertical', tender:'tabTender' };
+const TAB_KEYS = { selector:'tabSelector', horizontal:'tabHorizontal',
+                   vertical:'tabVertical', tender:'tabTender' };
+
 let currentTab = 'selector';
 function switchTab(tab){
   const changingTab = tab !== currentTab;
+  const goingRight = TABS.indexOf(tab) > TABS.indexOf(currentTab);
   currentTab = tab;
-  document.getElementById('tabSelector').classList.toggle('active', tab==='selector');
-  document.getElementById('tabTender').classList.toggle('active', tab==='tender');
+  for (const [name, id] of Object.entries(TAB_IDS))
+    document.getElementById(id).classList.toggle('active', tab===name);
+  // The top bar carries the current screen's name as its subtitle, so it has
+  // to be re-labelled on every switch -- not only on a language change.
+  renderChrome();
   render();
   // render() replaces #main's CONTENT, but #main itself is the same element
   // across every switch — so a previous direction's class is still sitting
@@ -254,17 +266,16 @@ function switchTab(tab){
     const main = document.getElementById('main');
     main.classList.remove('tab-enter-l', 'tab-enter-r');
     void main.offsetWidth;
-    main.classList.add(tab === 'tender' ? 'tab-enter-r' : 'tab-enter-l');
+    main.classList.add(goingRight ? 'tab-enter-r' : 'tab-enter-l');
   }
 }
 
 // Re-label everything that lives outside <main> (top bar, tab bar, picker).
 function renderChrome(){
   document.getElementById('appTitle').textContent = t('appTitle');
-  document.getElementById('topSub').textContent =
-    currentTab==='selector' ? t('tabSelector') : t('tabTender');
-  document.getElementById('tabSelectorLabel').textContent = t('tabSelector');
-  document.getElementById('tabTenderLabel').textContent = t('tabTender');
+  document.getElementById('topSub').textContent = t(TAB_KEYS[currentTab]);
+  for (const [name, key] of Object.entries(TAB_KEYS))
+    document.getElementById(TAB_IDS[name] + 'Label').textContent = t(key);
   const sel = document.getElementById('langSel');
   sel.setAttribute('aria-label', t('language'));
   sel.title = t('language');
@@ -287,6 +298,10 @@ function render(){
     document.getElementById('freqPill').style.display = selState.frequency ? '' : 'none';
     main.innerHTML = renderSelectorHTML();
     wireSelectorEvents();
+  } else if (currentTab === 'horizontal' || currentTab === 'vertical'){
+    document.getElementById('freqPill').style.display = 'none';
+    main.innerHTML = renderSurfaceHTML(currentTab);
+    wireSurfaceEvents(currentTab);
   } else {
     document.getElementById('freqPill').style.display = 'none';
     main.innerHTML = renderTenderHTML();
@@ -716,4 +731,188 @@ if ('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
     navigator.serviceWorker.register('service-worker.js').catch(()=>{});
   });
+}
+
+// ---------------------------------------------------------------------------
+// Surface ranges — Horizontal (MMP) and Vertical (MTP)
+//
+// One screen serves both: the duty inputs are identical and only the filter row
+// differs (speed for horizontal, frequency + drive for vertical). Results are a
+// ranked list rather than the Selector's single plate, because a surface duty
+// point is usually met by several genuinely different pumps and the choice
+// between them belongs to whoever is quoting.
+// ---------------------------------------------------------------------------
+const STORE_KEY_SURFACE = 'msp_surface_state_v1';
+
+const HZ_SPEEDS  = [['any','—'], ['1450','1450'], ['2900','2900']];
+const VT_FREQS   = [['any','—'], ['50 Hz','50Hz'], ['60 Hz','60Hz'], ['Engine','Engine']];
+const VT_DRIVES  = [['any','—'], ['Electric','Electric'], ['Diesel','Diesel']];
+
+let surfState = loadSurfaceState();
+function loadSurfaceState(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY_SURFACE);
+    if (raw) return Object.assign(defaultSurfaceState(), JSON.parse(raw));
+  }catch(e){}
+  return defaultSurfaceState();
+}
+function defaultSurfaceState(){
+  return { Q:'', H:'', safety:5, speed:'any', freq:'any', drive:'any' };
+}
+function saveSurfaceState(){
+  try{ localStorage.setItem(STORE_KEY_SURFACE, JSON.stringify(surfState)); }catch(e){}
+}
+
+function surfaceCompute(kind){
+  const Q = Number(surfState.Q) || 0, H = Number(surfState.H) || 0;
+  const ready = Q > 0 && H > 0;
+  if (!ready) return { ready:false, res:null };
+  const res = kind === 'horizontal'
+    ? selectHorizontal({ Q, H, safety: surfState.safety, speed: surfState.speed })
+    : selectVertical({ Q, H, safety: surfState.safety, freq: surfState.freq, drive: surfState.drive });
+  return { ready:true, res };
+}
+
+function segHTML(id, options, current){
+  return '<div class="segmented" id="' + id + '">' + options.map(function(o){
+    return '<button data-val="' + o[0] + '" class="' + (current===o[0]?'active':'') + '">' + bidi(o[1]) + '</button>';
+  }).join('') + '</div>';
+}
+
+function pct(x, d){ if (d === undefined) d = 1; return x==null ? '—' : fmt(x*100, d) + '%'; }
+
+function surfHintHTML(res){
+  return '<div class="hint">' + t('designHead', {
+    h: bidi(fmt(res.designHead)),
+    ls: bidi(fmt(qOtherUnit(surfState.Q),2)),
+    u: bidi(otherFlowUnitLabel())
+  }) + '</div>';
+}
+
+function renderSurfaceHTML(kind){
+  const c = surfaceCompute(kind);
+  const filters = kind === 'horizontal'
+    ? '<div class="field"><label>' + t('speedRpm') + '</label>' + segHTML('spdSeg', HZ_SPEEDS, surfState.speed) + '</div>'
+    : '<div class="field"><label>' + t('frequency') + '</label>' + segHTML('freqSeg2', VT_FREQS, surfState.freq) + '</div>'
+      + '<div class="field"><label>' + t('driveType') + '</label>' + segHTML('drvSeg', VT_DRIVES, surfState.drive) + '</div>';
+
+  return ''
+    + '<div class="card">'
+    +   '<h2>' + t(kind==='horizontal' ? 'horizontalTitle' : 'verticalTitle') + '</h2>'
+    +   filters
+    +   '<div class="field row3 duty-row">'
+    +     '<div><label>' + t('flowQ') + '</label>'
+    +       '<div class="numfield"><input type="number" inputmode="decimal" id="sQ" value="' + qToDisplay(surfState.Q) + '">'
+    +       '<button type="button" class="unit unit-toggle" onclick="toggleFlowUnit()" title="' + otherFlowUnitLabel() + '"><bdi>' + flowUnitLabel() + '</bdi></button></div></div>'
+    +     '<div><label>' + t('headH') + '</label>'
+    +       '<div class="numfield"><input type="number" inputmode="decimal" id="sH" value="' + hToDisplay(surfState.H) + '">'
+    +       '<button type="button" class="unit unit-toggle" onclick="toggleHeadUnit()" title="' + (headUnit==='ft'?'m':'ft') + '"><bdi>' + headUnitLabel() + '</bdi></button></div></div>'
+    +     '<div><label>' + t('safety') + '</label>'
+    +       '<div class="numfield"><input type="number" inputmode="decimal" id="sSafety" value="' + surfState.safety + '"><span class="unit">%</span></div></div>'
+    +   '</div>'
+    +   '<div id="sHint">' + (c.ready ? surfHintHTML(c.res) : '') + '</div>'
+    + '</div>'
+    + '<div id="sResults">' + renderSurfaceResultsHTML(kind, c.ready, c.res) + '</div>';
+}
+
+function renderSurfaceResultsHTML(kind, ready, res){
+  const sep = currentLang==='ar' ? '، ' : ', ';
+  if (!ready){
+    return '<div class="plate empty">'
+      + '<div class="plate-label">' + t('selectedModel') + '</div>'
+      + '<div class="model">—</div>'
+      + '<div class="status">' + t('chooseToSee', {fields: [t('fFlow'), t('fHead')].join(sep)}) + '</div>'
+      + '</div>' + renderSocialFooterHTML();
+  }
+  if (!res.candidates.length){
+    return '<div class="plate">'
+      + '<div class="plate-label">' + t(kind==='horizontal' ? 'horizontalTitle' : 'verticalTitle') + '</div>'
+      + '<div class="model">' + t('noMatch') + '</div>'
+      + '<div class="status warn">⚠ ' + t('noSurfaceMatch', {
+            head: bidi(fmt(res.designHead)), q: bidi(fmt(Number(surfState.Q)||0,2)) }) + '</div>'
+      + '<div class="status-note">' + t('contactSales') + '</div>'
+      + '</div>' + renderSocialFooterHTML();
+  }
+  const rows = res.candidates.map(function(c,i){
+    return kind==='horizontal' ? renderHorizCard(c,i) : renderVertCard(c,i);
+  }).join('');
+  return '<div class="results-head"><h2>' + t('matches') + '</h2>'
+       + '<span class="tender-count">' + t('matchCount', {n: bidi(res.candidates.length), all: bidi(res.allCount)}) + '</span></div>'
+       + rows + renderSocialFooterHTML();
+}
+
+function overClass(o){ return o <= 0.10 ? 'ok' : (o <= 0.30 ? '' : 'warn'); }
+
+function statLine(items){
+  return '<div class="plate-grid">' + items.map(function(it){
+    return '<div><div class="stat-label">' + it[0] + '</div><div class="stat-value"><bdi>' + it[1] + '</bdi></div></div>';
+  }).join('') + '</div>';
+}
+
+function renderHorizCard(c, i){
+  return ''
+  + '<div class="plate result-row' + (i===0?' best':'') + '">'
+  +   '<div class="plate-head-row"><div class="model"><bdi>' + c.model + '</bdi></div>'
+  +     '<span class="series-tag"><bdi>' + c.rpm + ' rpm</bdi></span></div>'
+  +   '<div class="status ' + overClass(c.oversize) + '">' + (i===0?'✓ ':'')
+  +     t('meetsDuty', {head: bidi(fmt(c.achievedHead)), q: bidi(fmt(c.Q,2)), over: bidi(pct(c.oversize,0))}) + '</div>'
+  +   statLine([[t('stagesLbl'), c.stages + ' × ' + fmt(c.headPerStage) + ' m'],
+                [t('impeller'),  c.impeller + ' mm'],
+                [t('casing'),    fmt(c.bar) + ' / ' + c.maxBar + ' bar']])
+  +   statLine([[t('motorSuggested'), c.motorKw + ' kW' + (c.motorIec ? ' · ' + c.motorIec : '')],
+                [t('shaftPowerEst'),  '≈ ' + fmt(c.shaftKw) + ' kW'],
+                [t('dnLbl'),          'DN ' + c.dn]])
+  +   '<div class="status-note small">' + t('motorLadderNote', {
+          list: bidi(c.motorLadder.join(' · ')), eff: bidi(pct(c.assumedEff,0))}) + '</div>'
+  + '</div>';
+}
+
+function renderVertCard(c, i){
+  const effBlock = c.powerSuspect
+    ? '<div class="status-note small warn-note">' + t('powerSuspect') + '</div>'
+    : statLine([[t('effPump'),   pct(c.pumpEff)],
+                [t('effMotor'),  pct(c.motorEff)],
+                [t('effSystem'), pct(c.systemEff)]])
+      + '<div class="status-note small">' + t('effNote') + '</div>';
+  return ''
+  + '<div class="plate result-row' + (i===0?' best':'') + '">'
+  +   '<div class="plate-head-row"><div class="model"><bdi>' + c.code + '</bdi></div>'
+  +     '<span class="series-tag"><bdi>' + c.rpm + ' rpm</bdi></span></div>'
+  +   '<div class="status ' + overClass(c.oversize) + '">' + (i===0?'✓ ':'')
+  +     t('meetsDuty', {head: bidi(fmt(c.achievedHead)), q: bidi(fmt(c.Q,2)), over: bidi(pct(c.oversize,0))}) + '</div>'
+  +   statLine([[t('stagesLbl'),     String(c.stages)],
+                [t('absorbedPower'), fmt(c.absorbedKw) + ' kW'],
+                [t('driveType'),     driveLabel(c.drive)]])
+  +   effBlock
+  + '</div>';
+}
+
+function driveLabel(d){
+  return d==='Electric' ? t('driveElectric') : (d==='Diesel' ? t('driveDiesel') : d);
+}
+
+function wireSurfaceEvents(kind){
+  const bind = function(id, key){
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', function(e){
+      const b = e.target.closest('button'); if(!b) return;
+      surfState[key] = b.dataset.val; saveSurfaceState(); render();
+    });
+  };
+  bind('spdSeg','speed'); bind('freqSeg2','freq'); bind('drvSeg','drive');
+
+  const qEl = document.getElementById('sQ');
+  const hEl = document.getElementById('sH');
+  const sEl = document.getElementById('sSafety');
+  // Same reason as the Selector: rebuilding the form on every keystroke breaks
+  // the caret in <input type="number">, so only the output is re-rendered.
+  const refresh = function(){
+    const c = surfaceCompute(kind);
+    document.getElementById('sHint').innerHTML = c.ready ? surfHintHTML(c.res) : '';
+    document.getElementById('sResults').innerHTML = renderSurfaceResultsHTML(kind, c.ready, c.res);
+  };
+  qEl.addEventListener('input', function(){ surfState.Q = qFromDisplay(qEl.value); saveSurfaceState(); refresh(); });
+  hEl.addEventListener('input', function(){ surfState.H = hFromDisplay(hEl.value); saveSurfaceState(); refresh(); });
+  sEl.addEventListener('input', function(){ surfState.safety = sEl.value; saveSurfaceState(); refresh(); });
 }
