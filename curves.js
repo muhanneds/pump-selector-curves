@@ -26,8 +26,23 @@
 const PAD = { t: 14, r: 16, b: 40, l: 52 };
 
 function chartBox(){
-  const w = (typeof window !== 'undefined' && window.innerWidth) || 640;
-  return w < 560 ? { W: Math.max(330, w - 56), H: 300 } : { W: 640, H: 300 };
+  const w = (typeof window !== "undefined" && window.innerWidth) || 640;
+  const tab = (typeof currentTab !== "undefined") ? currentTab : "selector";
+  let inner;
+  if (w >= 900){
+    // Desktop shell: 1160px cap, 30px main padding, 20px card padding. The
+    // Selector gives its curve the full width of both columns; the surface
+    // tabs keep theirs in the result column beside a 400px form.
+    const content = Math.min(1160, w) - 60;
+    inner = (tab === "selector") ? content - 40 : content - 428 - 40;
+  } else {
+    // Phone/tablet: single 560px column, 14px main padding, 12px card padding.
+    inner = Math.min(560, w) - 28 - 24;
+  }
+  const W = Math.max(300, Math.round(inner));
+  // A very wide frame with a 300-unit height turns the curve into a flat
+  // smear, so the taller frame is only used once there is width to justify it.
+  return { W: W, H: W > 850 ? 380 : 300 };
 }
 
 // Axis ticks land on 1/2/2.5/5 x 10^n so the labels stay round however the

@@ -403,13 +403,20 @@ function renderResultsHTML(ready, r){
     }
   }
 
+  return plateHTML + altHTML;
+}
+
+// The curve lives outside #resultArea so the desktop grid can give it the full
+// width of both columns. On a phone the two areas simply stack, which is the
+// same order as before: form, answer, curve.
+function renderCurveAreaHTML(ready, r){
   let curveHTML = '';
-  if (ready && r.primaryTag !== 'OUT OF RANGE' && r.primary && r.primary.model){
+  if (ready && r && r.primaryTag !== 'OUT OF RANGE' && r.primary && r.primary.model){
     const svg = boreholeCurve(r.primaryTag, r.primary.model.name,
                               Number(selState.Q)||0, r.primary.achievedHead, r.designHead);
     if (svg) curveHTML = curveCardHTML(t('curveTitle'), svg, r.primary.model.name);
   }
-  return plateHTML + altHTML + curveHTML + renderSocialFooterHTML();
+  return curveHTML + renderSocialFooterHTML();
 }
 
 function renderHintHTML(ready, r){
@@ -463,6 +470,7 @@ function renderSelectorHTML(){
     </div>
 
     <div id="resultArea">${renderResultsHTML(ready, r)}</div>
+    <div id="curveArea">${renderCurveAreaHTML(ready, r)}</div>
   `;
 }
 
@@ -498,6 +506,7 @@ function renderInPlaceSelector(){
   const { ready, r } = selectorCompute();
   document.getElementById('hintSlot').innerHTML = renderHintHTML(ready, r);
   document.getElementById('resultArea').innerHTML = renderResultsHTML(ready, r);
+  document.getElementById('curveArea').innerHTML = renderCurveAreaHTML(ready, r);
   document.getElementById('freqPill').textContent = selState.frequency || '';
   document.getElementById('freqPill').style.display = selState.frequency ? '' : 'none';
 }

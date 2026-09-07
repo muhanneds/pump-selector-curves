@@ -465,14 +465,24 @@ button.unit.unit-toggle:active{ background: var(--amber); border-color: var(--am
   main{ padding: 28px 30px 48px; }
 
   /* ---------- Selector: compact form, generous result ---------- */
+  /* Form and answer sit side by side; the curve then spans the full width
+     underneath. Before this the curve was stuck in the right-hand column, so
+     the result stack ran far past the bottom of the short duty form and left a
+     tall empty gap beside it -- and the chart was squeezed into two thirds of
+     the screen while all that space went unused. */
   main[data-tab="selector"]{
     display:grid;
-    grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
-    gap: 28px;
+    grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+    gap: 24px 28px;
     align-items: start;
   }
-  main[data-tab="selector"] .card{ margin-bottom:0; padding:24px 24px 22px; border-radius:20px; }
-  main[data-tab="selector"] #resultArea{ position: sticky; top: 24px; }
+  main[data-tab="selector"] > .card{
+    grid-column:1; grid-row:1;
+    margin-bottom:0; padding:24px 24px 22px; border-radius:20px;
+  }
+  main[data-tab="selector"] #resultArea{ grid-column:2; grid-row:1; min-width:0; }
+  main[data-tab="selector"] #curveArea{ grid-column:1 / -1; grid-row:2; min-width:0; }
+  main[data-tab="selector"] #curveArea .card{ margin-bottom:0; }
 
   /* ---------- Horizontal / Vertical: same two-column idea as Selector ----------
      The duty form is short and never changes while you compare; the answer is a
@@ -523,15 +533,15 @@ button.unit.unit-toggle:active{ background: var(--amber); border-color: var(--am
   .numfield input{ font-size:20px; }
 
   /* ---------- Result: read as a spec sheet, not a phone card ---------- */
-  .plate{ padding: 28px 30px 26px; border-radius:20px; }
-  .plate .plate-head-row{ margin-bottom:10px; }
-  .plate .plate-label{ font-size:11.5px; letter-spacing:1.4px; }
-  .plate .model{ font-size:44px; letter-spacing:.5px; }
+  .plate{ padding: 22px 24px 20px; border-radius:20px; }
+  .plate .plate-head-row{ margin-bottom:8px; }
+  .plate .plate-label{ font-size:11px; letter-spacing:1.3px; }
+  .plate .model{ font-size:34px; letter-spacing:.4px; }
   .plate .series-tag{ font-size:13px; padding:4px 12px; }
-  .plate .status{ font-size:14px; margin-top:16px; }
+  .plate .status{ font-size:13.5px; margin-top:12px; }
   .plate-grid{
     grid-template-columns: repeat(3, 1fr);
-    margin-top:24px; padding-top:20px; gap:0;
+    margin-top:18px; padding-top:15px; gap:0;
   }
   /* Vertical rules between the three specs — reads as an instrument panel. */
   .plate-grid > div{ padding-inline:18px; }
