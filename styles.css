@@ -502,6 +502,13 @@ button.unit.unit-toggle:active{ background: var(--amber); border-color: var(--am
     flex:1 1 auto; display:flex; flex-direction:column;
   }
   main[data-tab="selector"] #resultArea .plate .plate-grid{ margin-top:auto; }
+  /* The plate is taller than its content needs, so the answer itself is set
+     larger to occupy that space rather than leaving the code stranded at the
+     top of a big card. Checked at 46px too -- nothing clips and the status
+     stays on one line in all four languages -- so 42px is a size choice, not
+     a limit. */
+  main[data-tab="selector"] #resultArea .plate .model{ font-size:42px; }
+  main[data-tab="selector"] #resultArea .plate .status{ font-size:15.5px; margin-top:14px; }
   main[data-tab="selector"] #resultArea .altbox{ flex:0 0 auto; margin-bottom:0; }
   main[data-tab="selector"] #footerArea{
     grid-column:2; grid-row:2; min-width:0; align-self:end;
