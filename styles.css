@@ -473,47 +473,38 @@ button.unit.unit-toggle:active{ background: var(--amber); border-color: var(--am
   main[data-tab="selector"]{
     display:grid;
     grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+    /* Row 1 is sized by the ANSWER, not by the form. min-content holds it at
+       the plate's own height so the social bar in row 2 sits directly under
+       the alternative box instead of being pushed down by the taller form,
+       and row 2 being 1fr collects whatever height the form has left over
+       BELOW the bar -- an ordinary ragged bottom edge rather than a gap
+       between two cards or a hole inside one. */
+    grid-template-rows: min-content 1fr auto;
     gap: 24px 28px;
     align-items: start;
   }
-  /* Three rows: the form spans the first two on the left, so the space left
-     over beside it -- the duty form is taller than the plate and its
-     alternative -- is a real cell the social/contact bar can sit in, pinned to
-     the bottom so it lines up with the end of the form. On a phone none of
-     this applies and the bar stays where it belongs, last on the page. */
   main[data-tab="selector"] > .card{
     grid-column:1; grid-row:1 / 3;
     margin-bottom:0; padding:24px 24px 22px; border-radius:20px;
   }
-  /* Row 1 takes all the slack (1fr) and row 2 is frozen at the social bar's own
-     height, so the plate can thicken into the space the taller duty form
-     leaves rather than stopping at its content and opening a band of empty
-     page above the bar. Plain "auto auto" splits that slack between the two
-     rows and only closes half the gap.
-     The spec row is pushed to the bottom with margin-top:auto rather than
-     space-between, so the empty and out-of-range plates -- which have no spec
-     row -- keep their text together at the top instead of being spread out. */
-  main[data-tab="selector"]{ grid-template-rows: minmax(0, 1fr) min-content auto; }
-  main[data-tab="selector"] #resultArea{
-    grid-column:2; grid-row:1; min-width:0;
-    align-self:stretch; display:flex; flex-direction:column;
-  }
-  main[data-tab="selector"] #resultArea .plate{
-    flex:1 1 auto; display:flex; flex-direction:column;
-  }
-  main[data-tab="selector"] #resultArea .plate .plate-grid{ margin-top:auto; }
-  /* The plate is taller than its content needs, so the answer itself is set
-     larger to occupy that space rather than leaving the code stranded at the
-     top of a big card. Checked at 46px too -- nothing clips and the status
-     stays on one line in all four languages -- so 42px is a size choice, not
-     a limit. */
-  main[data-tab="selector"] #resultArea .plate .model{ font-size:42px; }
-  main[data-tab="selector"] #resultArea .plate .status{ font-size:15.5px; margin-top:14px; }
-  main[data-tab="selector"] #resultArea .altbox{ flex:0 0 auto; margin-bottom:0; }
+  /* The plate is sized by its own content. Forcing it to stretch to the form's
+     height only moved the emptiness inside it: every other gap in the card was
+     8-20px and the one above the spec row became 94px, which reads as a hole
+     rather than a fuller card.
+     The social bar instead sits directly under the alternative box, so nothing
+     is stretched and nothing is pinned to the bottom with a gap in front of
+     it. What is left over falls at the foot of the column, where a ragged
+     bottom edge is ordinary rather than a void inside a navy card. */
+  main[data-tab="selector"] #resultArea{ grid-column:2; grid-row:1; min-width:0; }
   main[data-tab="selector"] #footerArea{
-    grid-column:2; grid-row:2; min-width:0; align-self:end;
+    grid-column:2; grid-row:2; min-width:0; align-self:start;
   }
   main[data-tab="selector"] #footerArea .social-footer{ margin-top:0; }
+  
+  /* Set larger so the answer carries the card rather than sitting small at the
+     top of it. Checked to 46px in all four languages without clipping. */
+  main[data-tab="selector"] #resultArea .plate .model{ font-size:42px; }
+  main[data-tab="selector"] #resultArea .plate .status{ font-size:15.5px; margin-top:14px; }
   main[data-tab="selector"] #curveArea{ grid-column:1 / -1; grid-row:3; min-width:0; }
   main[data-tab="selector"] #curveArea .card{ margin-bottom:0; }
 
