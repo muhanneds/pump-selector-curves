@@ -499,22 +499,47 @@ button.unit.unit-toggle:active{ background: var(--amber); border-color: var(--am
      that fits its own controls, and the whole right column belongs to the
      result -- rather than a 560px phone column stranded in the middle of a
      desktop screen. */
+  /* The duty form is about 300px tall; the match list runs to well over 1700.
+     Stacking them in two columns left roughly 1500px of empty page down the
+     left-hand side. So only the CURVE sits beside the form -- the two are of
+     comparable height -- and the list drops below across the full width, two
+     abreast, which also halves how far you scroll away from the chart. */
   main[data-tab="horizontal"],
   main[data-tab="vertical"]{
     display:grid;
     grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
-    gap: 28px;
+    gap: 24px 28px;
     align-items: start;
   }
-  /* Direct child only: the curve cards live inside #sResults and must not be
-     pulled into the left column. */
   main[data-tab="horizontal"] > .card,
   main[data-tab="vertical"] > .card{
+    grid-column:1; grid-row:1;
     margin-bottom:0; padding:24px 24px 22px; border-radius:20px;
-    position: sticky; top: 24px;
   }
-  main[data-tab="horizontal"] #sResults,
-  main[data-tab="vertical"] #sResults{ min-width:0; }
+  /* The chart column spans both of the first two rows: Vertical draws two of
+     them (head and power) and so runs taller than the form. The social bar
+     takes the second row on the left, directly under the form, which is where
+     that difference in height would otherwise be dead page. */
+  main[data-tab="horizontal"] #sTop,
+  main[data-tab="vertical"] #sTop{ grid-column:2; grid-row:1 / 3; min-width:0; }
+  main[data-tab="horizontal"] #sTop .card:last-child,
+  main[data-tab="vertical"] #sTop .card:last-child{ margin-bottom:0; }
+  main[data-tab="horizontal"] #footerArea,
+  main[data-tab="vertical"] #footerArea{
+    grid-column:1; grid-row:2; align-self:start; min-width:0;
+  }
+  main[data-tab="horizontal"] #footerArea .social-footer,
+  main[data-tab="vertical"] #footerArea .social-footer{ margin-top:0; }
+  main[data-tab="horizontal"] #sList,
+  main[data-tab="vertical"] #sList{ grid-column:1 / -1; grid-row:3; min-width:0; }
+
+  /* Two match cards abreast. align-items:start so a taller card (a vertical
+     one carrying three efficiency figures) never stretches its neighbour. */
+  .result-rows{
+    display:grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap:14px; align-items:start;
+  }
+  .result-rows .plate{ margin-bottom:0; }
 
   /* The list is for comparing, so the rows stay compact and the chart gets the
      room -- a result row blown up to plate size would out-shout the curve. */

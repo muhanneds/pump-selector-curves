@@ -838,17 +838,22 @@ function renderSurfaceHTML(kind){
     +   '</div>'
     +   '<div id="sHint">' + (c.ready ? surfHintHTML(c.res) : '') + '</div>'
     + '</div>'
-    + '<div id="sResults">' + renderSurfaceResultsHTML(kind, c.ready, c.res) + '</div>';
+    + '<div id="sTop">' + renderSurfaceTopHTML(kind, c.ready, c.res) + '</div>'
+    + '<div id="sList">' + renderSurfaceListHTML(kind, c.ready, c.res) + '</div>'
+    + '<div id="footerArea">' + renderSocialFooterHTML() + '</div>';
 }
 
-function renderSurfaceResultsHTML(kind, ready, res){
+// The area beside the duty form. It holds the curve for the picked pump, or --
+// when there is nothing to chart yet -- the plate that says why, so the form
+// never sits next to an empty column.
+function renderSurfaceTopHTML(kind, ready, res){
   const sep = currentLang==='ar' ? '، ' : ', ';
   if (!ready){
     return '<div class="plate empty">'
       + '<div class="plate-label">' + t('selectedModel') + '</div>'
       + '<div class="model">—</div>'
       + '<div class="status">' + t('chooseToSee', {fields: [t('fFlow'), t('fHead')].join(sep)}) + '</div>'
-      + '</div>' + renderSocialFooterHTML();
+      + '</div>';
   }
   if (!res.candidates.length){
     return '<div class="plate">'
@@ -857,27 +862,37 @@ function renderSurfaceResultsHTML(kind, ready, res){
       + '<div class="status warn">⚠ ' + t('noSurfaceMatch', {
             head: bidi(fmt(res.designHead)), q: bidi(fmt(Number(surfState.Q)||0,2)) }) + '</div>'
       + '<div class="status-note">' + t('contactSales') + '</div>'
-      + '</div>' + renderSocialFooterHTML();
+      + '</div>';
   }
-  const pick = Math.min(surfState.pick|0, res.candidates.length - 1);
+  const chosen = res.candidates[surfacePick(res)];
+  if (kind === 'horizontal'){
+    const svg = horizontalCurve(chosen);
+    return svg ? curveCardHTML(t('curveTitle'), svg, chosen.model) : '';
+  }
+  const c = verticalCurve(chosen);
+  if (!c || !c.head) return '';
+  return curveCardHTML(t('curveTitle'), c.head, chosen.code)
+       + (c.power ? curveCardHTML(t('powerTitle'), c.power, chosen.code, ['mainp','duty']) : '');
+}
+
+// A stored pick can outlive the result set it came from -- change the duty and
+// there may be fewer matches than before.
+function surfacePick(res){
+  return Math.max(0, Math.min(surfState.pick|0, res.candidates.length - 1));
+}
+
+// The ranked list. Full width on desktop and two abreast, because it is a list
+// for comparing: twelve vertical matches down one column is a lot of scrolling
+// past a chart you cannot see any more.
+function renderSurfaceListHTML(kind, ready, res){
+  if (!ready || !res.candidates.length) return '';
+  const pick = surfacePick(res);
   const rows = res.candidates.map(function(c,i){
     return kind==='horizontal' ? renderHorizCard(c,i,i===pick) : renderVertCard(c,i,i===pick);
   }).join('');
-  const chosen = res.candidates[pick];
-  let curveHTML = '';
-  if (kind === 'horizontal'){
-    const svg = horizontalCurve(chosen);
-    if (svg) curveHTML = curveCardHTML(t('curveTitle'), svg, chosen.model);
-  } else {
-    const c = verticalCurve(chosen);
-    if (c && c.head){
-      curveHTML = curveCardHTML(t('curveTitle'), c.head, chosen.code)
-                + (c.power ? curveCardHTML(t('powerTitle'), c.power, chosen.code, ['mainp','duty']) : '');
-    }
-  }
   return '<div class="results-head"><h2>' + t('matches') + '</h2>'
        + '<span class="tender-count">' + t('matchCount', {n: bidi(res.candidates.length), all: bidi(res.allCount)}) + '</span></div>'
-       + curveHTML + rows + renderSocialFooterHTML();
+       + '<div class="result-rows">' + rows + '</div>';
 }
 
 function overClass(o){ return o <= 0.10 ? 'ok' : (o <= 0.30 ? '' : 'warn'); }
@@ -951,13 +966,17 @@ function wireSurfaceEvents(kind){
   const refresh = function(){
     const c = surfaceCompute(kind);
     document.getElementById('sHint').innerHTML = c.ready ? surfHintHTML(c.res) : '';
-    document.getElementById('sResults').innerHTML = renderSurfaceResultsHTML(kind, c.ready, c.res);
+    document.getElementById('sTop').innerHTML = renderSurfaceTopHTML(kind, c.ready, c.res);
+    document.getElementById('sList').innerHTML = renderSurfaceListHTML(kind, c.ready, c.res);
   };
-  const results = document.getElementById('sResults');
+  const results = document.getElementById('sList');
   const pickFrom = function(e){
     const row = e.target.closest('.result-row'); if(!row) return;
     surfState.pick = Number(row.dataset.pick) || 0; saveSurfaceState(); refresh();
-    document.getElementById('sResults').scrollIntoView({block:'start', behavior:'smooth'});
+    // Bring the chart back into view -- picking a row is a request to look at
+    // that pump's curve, and on desktop the chart sits above the list.
+    const top = document.getElementById('sTop');
+    if (top) top.scrollIntoView({block: 'nearest', behavior: 'smooth'});
   };
   results.addEventListener('click', pickFrom);
   results.addEventListener('keydown', function(e){
