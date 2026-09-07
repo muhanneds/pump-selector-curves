@@ -447,12 +447,21 @@ button.unit.unit-toggle:active{ background: var(--amber); border-color: var(--am
   .topbar{ order:0; }
   .tabbar{ order:1; }
   main{ order:2; }
+  /* The header is sticky, so a tab strip left in normal flow scrolls up and
+     slides underneath it -- which looks like the two are overlapping, and
+     costs you the tabs entirely once past the fold. The strip sticks too,
+     docked directly below the header. --topbar-h is measured from the real
+     header in app.js (88px on every language today) so this offset cannot
+     drift out of step with it; the literal is only a pre-script fallback.
+     The header keeps the higher z-index so it always wins a tie. */
   .tabbar{
-    position: static; max-width:none; margin:0;
+    position: sticky; top: var(--topbar-h, 88px); z-index: 20;
+    max-width:none; margin:0;
     background: var(--surface);
     border-top:none; border-bottom:1px solid var(--line);
     box-shadow:none; padding: 0 30px; gap:4px;
   }
+  .topbar{ z-index: 21; }
   .tabbar button{
     flex:0 0 auto; flex-direction:row; gap:9px;
     padding:15px 20px; font-size:14px; letter-spacing:.2px;

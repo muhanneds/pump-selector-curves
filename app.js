@@ -271,6 +271,17 @@ function switchTab(tab){
 }
 
 // Re-label everything that lives outside <main> (top bar, tab bar, picker).
+// The desktop tab strip sticks directly below the header, so it needs the
+// header's real height rather than a number copied into the stylesheet -- the
+// header grows if a language ever wraps its title, and a stale offset would
+// leave a gap or let the two overlap again.
+function syncTopbarHeight(){
+  const bar = document.querySelector('.topbar');
+  if (!bar) return;
+  document.documentElement.style.setProperty('--topbar-h', bar.offsetHeight + 'px');
+}
+window.addEventListener('resize', syncTopbarHeight);
+
 function renderChrome(){
   document.getElementById('appTitle').textContent = t('appTitle');
   document.getElementById('topSub').textContent = t(TAB_KEYS[currentTab]);
@@ -280,6 +291,7 @@ function renderChrome(){
   sel.setAttribute('aria-label', t('language'));
   sel.title = t('language');
   if (sel.value !== currentLang) sel.value = currentLang;
+  syncTopbarHeight();
 }
 
 function changeLang(lang){
