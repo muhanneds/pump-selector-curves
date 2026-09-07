@@ -403,7 +403,13 @@ function renderResultsHTML(ready, r){
     }
   }
 
-  return plateHTML + altHTML + renderSocialFooterHTML();
+  let curveHTML = '';
+  if (ready && r.primaryTag !== 'OUT OF RANGE' && r.primary && r.primary.model){
+    const svg = boreholeCurve(r.primaryTag, r.primary.model.name,
+                              Number(selState.Q)||0, r.primary.achievedHead, r.designHead);
+    if (svg) curveHTML = curveCardHTML(t('curveTitle'), svg, r.primary.model.name);
+  }
+  return plateHTML + altHTML + curveHTML + renderSocialFooterHTML();
 }
 
 function renderHintHTML(ready, r){
@@ -757,7 +763,7 @@ function loadSurfaceState(){
   return defaultSurfaceState();
 }
 function defaultSurfaceState(){
-  return { Q:'', H:'', safety:5, speed:'any', freq:'any', drive:'any' };
+  return { Q:'', H:'', safety:5, speed:'any', freq:'any', drive:'any', pick:0 };
 }
 function saveSurfaceState(){
   try{ localStorage.setItem(STORE_KEY_SURFACE, JSON.stringify(surfState)); }catch(e){}
@@ -833,12 +839,25 @@ function renderSurfaceResultsHTML(kind, ready, res){
       + '<div class="status-note">' + t('contactSales') + '</div>'
       + '</div>' + renderSocialFooterHTML();
   }
+  const pick = Math.min(surfState.pick|0, res.candidates.length - 1);
   const rows = res.candidates.map(function(c,i){
-    return kind==='horizontal' ? renderHorizCard(c,i) : renderVertCard(c,i);
+    return kind==='horizontal' ? renderHorizCard(c,i,i===pick) : renderVertCard(c,i,i===pick);
   }).join('');
+  const chosen = res.candidates[pick];
+  let curveHTML = '';
+  if (kind === 'horizontal'){
+    const svg = horizontalCurve(chosen);
+    if (svg) curveHTML = curveCardHTML(t('curveTitle'), svg, chosen.model);
+  } else {
+    const c = verticalCurve(chosen);
+    if (c && c.head){
+      curveHTML = curveCardHTML(t('curveTitle'), c.head, chosen.code)
+                + (c.power ? curveCardHTML(t('powerTitle'), c.power, chosen.code, ['mainp','duty']) : '');
+    }
+  }
   return '<div class="results-head"><h2>' + t('matches') + '</h2>'
        + '<span class="tender-count">' + t('matchCount', {n: bidi(res.candidates.length), all: bidi(res.allCount)}) + '</span></div>'
-       + rows + renderSocialFooterHTML();
+       + curveHTML + rows + renderSocialFooterHTML();
 }
 
 function overClass(o){ return o <= 0.10 ? 'ok' : (o <= 0.30 ? '' : 'warn'); }
@@ -849,9 +868,10 @@ function statLine(items){
   }).join('') + '</div>';
 }
 
-function renderHorizCard(c, i){
+function renderHorizCard(c, i, picked){
   return ''
-  + '<div class="plate result-row' + (i===0?' best':'') + '">'
+  + '<div class="plate result-row' + (i===0?' best':'') + (picked?' picked':'')
+  +   '" data-pick="' + i + '" role="button" tabindex="0" aria-pressed="' + !!picked + '">'
   +   '<div class="plate-head-row"><div class="model"><bdi>' + c.model + '</bdi></div>'
   +     '<span class="series-tag"><bdi>' + c.rpm + ' rpm</bdi></span></div>'
   +   '<div class="status ' + overClass(c.oversize) + '">' + (i===0?'✓ ':'')
@@ -867,7 +887,7 @@ function renderHorizCard(c, i){
   + '</div>';
 }
 
-function renderVertCard(c, i){
+function renderVertCard(c, i, picked){
   const effBlock = c.powerSuspect
     ? '<div class="status-note small warn-note">' + t('powerSuspect') + '</div>'
     : statLine([[t('effPump'),   pct(c.pumpEff)],
@@ -875,7 +895,8 @@ function renderVertCard(c, i){
                 [t('effSystem'), pct(c.systemEff)]])
       + '<div class="status-note small">' + t('effNote') + '</div>';
   return ''
-  + '<div class="plate result-row' + (i===0?' best':'') + '">'
+  + '<div class="plate result-row' + (i===0?' best':'') + (picked?' picked':'')
+  +   '" data-pick="' + i + '" role="button" tabindex="0" aria-pressed="' + !!picked + '">'
   +   '<div class="plate-head-row"><div class="model"><bdi>' + c.code + '</bdi></div>'
   +     '<span class="series-tag"><bdi>' + c.rpm + ' rpm</bdi></span></div>'
   +   '<div class="status ' + overClass(c.oversize) + '">' + (i===0?'✓ ':'')
@@ -897,7 +918,7 @@ function wireSurfaceEvents(kind){
     if (!el) return;
     el.addEventListener('click', function(e){
       const b = e.target.closest('button'); if(!b) return;
-      surfState[key] = b.dataset.val; saveSurfaceState(); render();
+      surfState[key] = b.dataset.val; surfState.pick = 0; saveSurfaceState(); render();
     });
   };
   bind('spdSeg','speed'); bind('freqSeg2','freq'); bind('drvSeg','drive');
@@ -912,7 +933,38 @@ function wireSurfaceEvents(kind){
     document.getElementById('sHint').innerHTML = c.ready ? surfHintHTML(c.res) : '';
     document.getElementById('sResults').innerHTML = renderSurfaceResultsHTML(kind, c.ready, c.res);
   };
-  qEl.addEventListener('input', function(){ surfState.Q = qFromDisplay(qEl.value); saveSurfaceState(); refresh(); });
-  hEl.addEventListener('input', function(){ surfState.H = hFromDisplay(hEl.value); saveSurfaceState(); refresh(); });
+  const results = document.getElementById('sResults');
+  const pickFrom = function(e){
+    const row = e.target.closest('.result-row'); if(!row) return;
+    surfState.pick = Number(row.dataset.pick) || 0; saveSurfaceState(); refresh();
+    document.getElementById('sResults').scrollIntoView({block:'start', behavior:'smooth'});
+  };
+  results.addEventListener('click', pickFrom);
+  results.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pickFrom(e); }
+  });
+  qEl.addEventListener('input', function(){ surfState.Q = qFromDisplay(qEl.value); surfState.pick = 0; saveSurfaceState(); refresh(); });
+  hEl.addEventListener('input', function(){ surfState.H = hFromDisplay(hEl.value); surfState.pick = 0; saveSurfaceState(); refresh(); });
   sEl.addEventListener('input', function(){ surfState.safety = sEl.value; saveSurfaceState(); refresh(); });
+}
+
+// A chart is only worth its space once there is something to point at, so it
+// carries the model it belongs to in its own header rather than relying on
+// whichever card happens to sit above it.
+function curveCardHTML(title, svg, subject, keys){
+  // Only label what the chart actually draws -- the power panel has no
+  // sibling family and no design-head line, so listing them would be
+  // describing a different chart. Declared in here, not at file scope:
+  // the first render runs before the tail of this file is evaluated, and
+  // a const up there is still in its temporal dead zone at that point.
+  const KEY_LABEL = { main:'keySelected', mainp:'keySelected', sib:'keyOthers',
+                      duty:'keyDuty', guide:'keyDesign' };
+  return '<div class="card curve-card">'
+       +   '<div class="curve-head"><h2>' + title + '</h2>'
+       +     '<span class="curve-subject"><bdi>' + subject + '</bdi></span></div>'
+       +   '<div class="curve-wrap">' + svg + '</div>'
+       +   '<div class="curve-key">' + (keys || ['main','sib','duty','guide']).map(function(k){
+             return '<span class="k k-' + k + '">' + t(KEY_LABEL[k]) + '</span>';
+           }).join('') + '</div>'
+       + '</div>';
 }

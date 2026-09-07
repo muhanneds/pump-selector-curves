@@ -732,3 +732,59 @@ bdi{ unicode-bidi: isolate; }
 .row3.duty-row .numfield > span.unit{
   padding: 3px 0; border: 1px solid transparent; line-height: inherit;
 }
+
+/* ---------- Performance curves ----------
+   The chart is the point of this app, so it gets a white card of its own
+   rather than being tucked inside the navy plate: pump curves are read as
+   ink-on-paper in every catalogue, and dark ground would fight that. */
+.curve-card{ padding:14px 12px 12px; }
+.curve-head{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:4px 10px; margin:0 4px 6px; flex-wrap:wrap;
+}
+.curve-head h2{ margin:0; }
+.curve-subject{
+  font-family: var(--font-mono); font-size:12px; font-weight:700;
+  color: var(--navy); text-align:right; overflow-wrap:anywhere;
+}
+/* The SVG scales to the card; on a narrow phone it would otherwise squash the
+   plot area to the point where the curves merge. */
+.curve-wrap{ width:100%; overflow-x:auto; }
+svg.curve{ display:block; width:100%; height:auto; min-width:300px; }
+
+svg.curve .cg{ stroke:#E4E9F1; stroke-width:1; }
+svg.curve .ca{ stroke:#B9C4D4; stroke-width:1.2; }
+svg.curve .ct{ fill: var(--ink-faint); font-family: var(--font-mono); font-size:10px; }
+svg.curve .cax{ fill: var(--ink-soft); font-family: var(--font-ui); font-size:10.5px; font-weight:700; }
+svg.curve .cl{ fill:none; stroke-linejoin:round; stroke-linecap:round; }
+/* Siblings are context, not competition — the selected curve has to win. */
+svg.curve .cl.sib{ stroke:#C2CEE0; stroke-width:1.4; }
+svg.curve .cl.main{ stroke: var(--navy); stroke-width:2.6; }
+svg.curve .cl.main.power{ stroke: var(--teal); }
+svg.curve .cguide{ stroke: var(--teal); stroke-width:1.4; stroke-dasharray:6 4; opacity:.85; }
+svg.curve .cdrop{ stroke: var(--amber-deep); stroke-width:1.2; stroke-dasharray:3 3; }
+svg.curve .cdot{ fill: var(--amber); stroke: var(--amber-deep); stroke-width:2; }
+
+.curve-key{
+  display:flex; flex-wrap:wrap; gap:6px 14px; margin:8px 4px 0;
+  font-size:11px; color: var(--ink-soft);
+}
+.curve-key .k{ display:flex; align-items:center; gap:5px; }
+.curve-key .k::before{ content:""; width:14px; height:0; border-top-width:2.5px; border-top-style:solid; }
+.curve-key .k-main::before{ border-top-color: var(--navy); }
+/* The power panel draws its one curve in teal, so its swatch must be teal
+   too -- a legend that miscolours its own line is worse than none. */
+.curve-key .k-mainp::before{ border-top-color: var(--teal); }
+.curve-key .k-sib::before{ border-top-color:#C2CEE0; }
+.curve-key .k-guide::before{ border-top-color: var(--teal); border-top-style:dashed; }
+.curve-key .k-duty::before{
+  border:none; width:9px; height:9px; border-radius:50%;
+  background: var(--amber); box-shadow:0 0 0 2px var(--amber-deep) inset;
+}
+
+/* Result rows drive which pump is charted, so they have to look pressable. */
+.plate.result-row{ cursor:pointer; }
+.plate.result-row:focus-visible{ outline:3px solid var(--amber); outline-offset:2px; }
+.plate.result-row.picked{
+  box-shadow: 0 0 0 2.5px var(--amber), var(--shadow-2);
+}

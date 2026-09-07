@@ -19,6 +19,8 @@ const LANGS = {
 
 const STRINGS = {
   en: {
+    curveTitle:'Performance curve', powerTitle:'Power curve',
+    keySelected:'Selected', keyOthers:'Other models', keyDuty:'Your duty point', keyDesign:'Design head',
     // --- Surface ranges: Horizontal (MMP) and Vertical (MTP) ---
     tabHorizontal:'Horizontal', tabVertical:'Vertical',
     horizontalTitle:'Horizontal multistage — MMP', verticalTitle:'Vertical line-shaft — MTP',
@@ -60,6 +62,8 @@ const STRINGS = {
     followUs:'Follow us', contactUs:'Contact us'
   },
   tr: {
+    curveTitle:'Performans eğrisi', powerTitle:'Güç eğrisi',
+    keySelected:'Seçilen', keyOthers:'Diğer modeller', keyDuty:'Çalışma noktanız', keyDesign:'Tasarım basma yüksekliği',
     // --- Yüzey gamları: Yatay (MMP) ve Dik milli (MTP) ---
     tabHorizontal:'Yatay', tabVertical:'Dik Milli',
     horizontalTitle:'Yatay kademeli — MMP', verticalTitle:'Dik milli — MTP',
@@ -101,6 +105,8 @@ const STRINGS = {
     followUs:'Bizi takip edin', contactUs:'Bize ulaşın'
   },
   ar: {
+    curveTitle:'منحنى الأداء', powerTitle:'منحنى القدرة',
+    keySelected:'المختار', keyOthers:'موديلات أخرى', keyDuty:'نقطة التشغيل', keyDesign:'الرفع التصميمي',
     // --- المضخات السطحية: أفقية (MMP) وعمودية (MTP) ---
     tabHorizontal:'أفقية', tabVertical:'عمودية',
     horizontalTitle:'مضخات أفقية متعددة المراحل — MMP', verticalTitle:'مضخات عمودية بعمود إدارة — MTP',
@@ -142,6 +148,8 @@ const STRINGS = {
     followUs:'تابعنا', contactUs:'تواصل معنا'
   },
   es: {
+    curveTitle:'Curva de rendimiento', powerTitle:'Curva de potencia',
+    keySelected:'Seleccionada', keyOthers:'Otros modelos', keyDuty:'Su punto de trabajo', keyDesign:'Altura de diseño',
     // --- Gamas de superficie: Horizontal (MMP) y Vertical (MTP) ---
     tabHorizontal:'Horizontal', tabVertical:'Vertical',
     horizontalTitle:'Multietapa horizontal — MMP', verticalTitle:'Eje vertical — MTP',
