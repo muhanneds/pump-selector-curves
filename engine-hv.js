@@ -188,9 +188,13 @@ function selectHorizontal(opts){
 // change and nothing else.
 //
 // SPEED AND DRIVE are in the code because without them it does not identify a
-// pump: 743 of 1452 models shared a code on the bare form, the diesel and
-// electric builds of the same hydraulics being identical. With both, 1396
-// are unique. The remaining 56 are pairs like MTP 124 and MTP 125, which are
+// pump. Of 1452 models, the number sharing a code with another is:
+//   bare code                1119
+//   + running speed           743   (diesel and electric builds still collide)
+//   + speed and drive          56
+// The last 56 are pairs like MTP 124 / MTP 125 -- different pumps that share
+// two leading digits and a nominal flow, separable only by a third series
+// digit, which the code does not carry. The remaining 56 are pairs like MTP 124 and MTP 125, which are
 // different pumps (180-330 vs 180-372 m3/h) that collapse onto the same two
 // leading digits and share a nominal flow; only the third series digit could
 // separate them, and MSP has chosen to keep the code at two.
