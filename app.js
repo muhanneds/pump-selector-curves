@@ -897,11 +897,12 @@ function surfacePick(res){
 // for comparing: twelve vertical matches down one column is a lot of scrolling
 // past a chart you cannot see any more.
 //
-// Only the first few are shown. A dozen candidates is not a helpful answer to
-// "which pump" -- past the top handful the rows sit further and further from
-// the duty, and a list that long reads as the app declining to choose. The
-// rest stay one tap away for anyone comparing the whole field.
-const SHORTLIST = 5;
+// Only the best three are shown: the recommendation and two alternatives. A
+// dozen candidates is not a helpful answer to "which pump", and neither is
+// five -- past the top few the rows sit further and further from the duty, and
+// a long list reads as the app declining to choose. The rest stay one tap away
+// for anyone comparing the whole field.
+const SHORTLIST = 3;
 
 function renderSurfaceListHTML(kind, ready, res){
   if (!ready || !res.candidates.length) return '';
