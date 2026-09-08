@@ -922,3 +922,16 @@ svg.curve .cdot{ fill: var(--amber); stroke: var(--amber-deep); stroke-width:2; 
   main[data-tab="horizontal"] .row3.duty-row > :nth-child(3),
   main[data-tab="vertical"] .row3.duty-row > :nth-child(3){ grid-column: 1 / -1; }
 }
+
+/* The "show N more" control under a shortlisted result list. Deliberately a
+   quiet, full-width row rather than a call to action: the shortlist above it is
+   the answer, and this is the way out for someone who wants to compare more. */
+.show-more{
+  display:block; width:100%; margin-top:10px;
+  padding:11px 14px; font-size:13px; font-weight:600;
+  color: var(--navy); background: var(--surface-2);
+  border:1px dashed var(--line); border-radius: var(--radius-md);
+  cursor:pointer;
+}
+.show-more:hover{ background:#fff; border-color: var(--navy); }
+.show-more:active{ background: var(--surface-2); }

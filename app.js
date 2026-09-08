@@ -896,15 +896,35 @@ function surfacePick(res){
 // The ranked list. Full width on desktop and two abreast, because it is a list
 // for comparing: twelve vertical matches down one column is a lot of scrolling
 // past a chart you cannot see any more.
+//
+// Only the first few are shown. A dozen candidates is not a helpful answer to
+// "which pump" -- past the top handful the rows sit further and further from
+// the duty, and a list that long reads as the app declining to choose. The
+// rest stay one tap away for anyone comparing the whole field.
+const SHORTLIST = 5;
+
 function renderSurfaceListHTML(kind, ready, res){
   if (!ready || !res.candidates.length) return '';
   const pick = surfacePick(res);
-  const rows = res.candidates.map(function(c,i){
+  const total = res.candidates.length;
+  // Never hide the row the user has picked, even if it ranks below the cut --
+  // so the collapsed length is the shortlist or the pick, whichever is longer.
+  const collapsed = Math.min(total, Math.max(SHORTLIST, pick + 1));
+  const shown = surfState.showAll ? total : collapsed;
+  const rows = res.candidates.slice(0, shown).map(function(c,i){
     return kind==='horizontal' ? renderHorizCard(c,i,i===pick) : renderVertCard(c,i,i===pick);
   }).join('');
+  // No button when collapsing would change nothing -- with a low-ranked row
+  // picked the collapsed list is already the whole list, and offering "show
+  // fewer" there is a control that does not do anything.
+  const more = total > shown
+    ? '<button type="button" class="show-more" id="sMore">' + t('showMore', {n: bidi(total - shown)}) + '</button>'
+    : (collapsed < total
+        ? '<button type="button" class="show-more" id="sMore">' + t('showFewer') + '</button>'
+        : '');
   return '<div class="results-head"><h2>' + t('matches') + '</h2>'
-       + '<span class="tender-count">' + t('matchCount', {n: bidi(res.candidates.length), all: bidi(res.allCount)}) + '</span></div>'
-       + '<div class="result-rows">' + rows + '</div>';
+       + '<span class="tender-count">' + t('matchCount', {n: bidi(shown), all: bidi(res.allCount)}) + '</span></div>'
+       + '<div class="result-rows">' + rows + '</div>' + more;
 }
 
 function overClass(o){ return o <= 0.10 ? 'ok' : (o <= 0.30 ? '' : 'warn'); }
@@ -986,6 +1006,10 @@ function wireSurfaceEvents(kind){
   };
   const results = document.getElementById('sList');
   const pickFrom = function(e){
+    if (e.target.closest('.show-more')){
+      surfState.showAll = !surfState.showAll;
+      saveSurfaceState(); refresh(); return;
+    }
     const row = e.target.closest('.result-row'); if(!row) return;
     surfState.pick = Number(row.dataset.pick) || 0; saveSurfaceState(); refresh();
     // Bring the chart back into view -- picking a row is a request to look at

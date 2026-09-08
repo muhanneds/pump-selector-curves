@@ -271,7 +271,19 @@ function selectVertical(opts){
     if (a.pumpEff != null && b.pumpEff != null) return b.pumpEff - a.pumpEff;
     return 0;
   });
-  return { designHead, candidates: out.slice(0, 12), allCount: out.length };
+  // One entry per series+speed+drive. Within a series the extra stages that
+  // clear the same duty are the same pump built taller: MTP 25040-11TT and
+  // -13TT come back on the same duty with identical oversize and identical
+  // efficiency, so listing both asks the user to choose between two rows that
+  // differ in nothing they can see. The first is the shortest build that does
+  // the job, which is the one to quote.
+  const seen = new Set(), best = [];
+  for (const c of out){
+    const k = c.series + '|' + c.rpm + '|' + c.drive;
+    if (seen.has(k)) continue;
+    seen.add(k); best.push(c);
+  }
+  return { designHead, candidates: best.slice(0, 12), allCount: out.length };
 }
 
 if (typeof module !== 'undefined'){
