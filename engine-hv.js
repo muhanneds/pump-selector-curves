@@ -166,26 +166,51 @@ function selectHorizontal(opts){
 // efficiency at the duty point -- the best answer available, and the reason
 // the efficiency work starts on this range.
 // ---------------------------------------------------------------------------
-// MSP's own shorthand for a vertical pump: the first two digits of the series
-// number followed by the middle flow of its published row, written closed up --
-// MTP 242/1F1-A/400-50/D16-1300 publishes 1200/1320/1440/1560/1680/1800/1920,
-// so it is written MTP 241560.
+// MSP's product code for a vertical pump, revised 8 Sep 2026.
 //
-// This names a HYDRAULIC SIZE, not one pump: it carries no stage count, so a
-// median of 16 models (up to 65) share a code, and three codes are claimed by
-// more than one series because the third series digit is dropped --
-// MTP 181440 covers MTP 186, 187 and 188. It is therefore shown ALONGSIDE the
-// full code and never used to identify or select a pump.
+//   MTP 12050-02TT (1480 E)
+//       ^^ ^^^  ^^^^  ^^^^ ^
+//       |  |    |     |    drive: E electric, D diesel
+//       |  |    |     running speed, rpm
+//       |  |    stage count, then one T per trailing digit of the
+//       |  |    original stage segment (2F2 -> 02TT, 1F1 -> 01T, 1F -> 01)
+//       |  nominal flow in L/s
+//       bore in inches, the first two digits of the series number
 //
-// The middle flow is close to the best efficiency point but is not it: across
-// 1435 models it is exactly the peak 49% of the time and within one flow step
-// 90% of the time, so the UI presents it as a code, not as an efficiency claim.
-function mtpShortCode(series, q){
-  const num = String(series || '').split(' ')[1];
+// Reproduces all five codes MSP supplied for the VG 122 family.
+//
+// FLOW: the middle of the model's own published flow row, converted to L/s
+// and rounded UP to the next 10 -- VG 122's 150 m3/h is 41.7 L/s and MSP
+// writes it 050. One caveat worth keeping in view: VG 122 also has a row
+// whose middle is exactly 50.0 L/s, so 'round up' and 'this series is simply
+// 50' both reproduce the examples and disagree on most other series. If a
+// code ever reads wrong on another family, this rounding is the line to
+// change and nothing else.
+//
+// SPEED AND DRIVE are in the code because without them it does not identify a
+// pump: 743 of 1452 models shared a code on the bare form, the diesel and
+// electric builds of the same hydraulics being identical. With both, 1396
+// are unique. The remaining 56 are pairs like MTP 124 and MTP 125, which are
+// different pumps (180-330 vs 180-372 m3/h) that collapse onto the same two
+// leading digits and share a nominal flow; only the third series digit could
+// separate them, and MSP has chosen to keep the code at two.
+function mtpShortCode(m){
+  if (!m) return null;
+  const num = String(m.series || '').split(' ')[1];
+  const q = m.q;
   if (!num || !q || !q.length) return null;
   const mid = q[Math.floor(q.length / 2)];
   if (mid == null || !isFinite(mid)) return null;
-  return 'MTP ' + num.slice(0, 2) + Math.round(mid);
+  const ls = Math.ceil((mid / 3.6) / 10) * 10;
+  const seg = String(m.code || '').split('/')[1];
+  const g = seg ? seg.match(/^(\d+)F(\d*)(E?)/) : null;
+  if (!g) return null;
+  const stage = String(g[1]).padStart(2, '0')
+              + 'T'.repeat(g[2] ? Number(g[2]) : 0)
+              + (g[3] || '');
+  const drive = m.drive === 'Electric' ? 'E' : 'D';
+  return 'MTP ' + num.slice(0, 2) + String(ls).padStart(3, '0')
+       + '-' + stage + ' (' + m.rpm + ' ' + drive + ')';
 }
 
 function selectVertical(opts){
@@ -213,7 +238,7 @@ function selectVertical(opts){
     out.push({
       range: 'vertical',
       code: m.code, series: m.series, ref: m.ref,
-      short: mtpShortCode(m.series, m.q),   // MSP shorthand, label only
+      short: mtpShortCode(m),                // MSP product code
       drive: m.drive, freq: m.freq, rpm: m.rpm, stages: m.stages,
       weightKg: m.weightKg, motorKw: m.motorKw, motorHp: m.motorHp,
       Q, designHead, achievedHead: h,

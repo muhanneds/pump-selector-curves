@@ -883,8 +883,8 @@ function renderSurfaceTopHTML(kind, ready, res){
   }
   const c = verticalCurve(chosen);
   if (!c || !c.head) return '';
-  return curveCardHTML(t('curveTitle'), c.head, chosen.code)
-       + (c.power ? curveCardHTML(t('powerTitle'), c.power, chosen.code, ['mainp','duty']) : '');
+  return curveCardHTML(t('curveTitle'), c.head, chosen.short || chosen.code)
+       + (c.power ? curveCardHTML(t('powerTitle'), c.power, chosen.short || chosen.code, ['mainp','duty']) : '');
 }
 
 // A stored pick can outlive the result set it came from -- change the duty and
@@ -944,10 +944,10 @@ function renderVertCard(c, i, picked){
   return ''
   + '<div class="plate result-row' + (i===0?' best':'') + (picked?' picked':'')
   +   '" data-pick="' + i + '" role="button" tabindex="0" aria-pressed="' + !!picked + '">'
-  +   '<div class="plate-head-row"><div class="model"><bdi>' + c.code + '</bdi></div>'
+  +   '<div class="plate-head-row"><div class="model"><bdi>'
+  +       (c.short || c.code) + '</bdi></div>'
   +     '<span class="tag-group">'
-  +       (c.short ? '<span class="series-tag code-tag" title="' + t('mspCode') + '"><bdi>' + c.short + '</bdi></span>' : '')
-  +       '<span class="series-tag"><bdi>' + c.rpm + ' rpm</bdi></span>'
+  +       '<span class="series-tag"><bdi>' + c.series + '</bdi></span>'
   +     '</span></div>'
   +   '<div class="status ' + overClass(c.oversize) + '">' + (i===0?'✓ ':'')
   +     t('meetsDuty', {head: bidi(fmt(c.achievedHead)), q: bidi(fmt(c.Q,2)), over: bidi(pct(c.oversize,0))}) + '</div>'
